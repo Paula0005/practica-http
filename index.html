@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Servidor HTTP - Grupo</title>
+
+  <!-- Fuente moderna -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Librería de confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:'Poppins',sans-serif;
+      background:linear-gradient(135deg,#050816,#0f172a,#111827);
+      color:white;
+      overflow-x:hidden;
+    }
+
+    h1,h2,h3{
+      font-weight:700;
+    }
+
+    section{
+      padding:60px 8%;
+    }
+
+    /* HERO */
+    .hero{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      text-align:center;
+      position:relative;
+    }
+
+    .hero h1{
+      font-size:3.5rem;
+      margin-bottom:30px;
+      background:linear-gradient(90deg,#00d4ff,#7c3aed);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .image-container{
+      position:relative;
+      width:80%;
+      max-width:850px;
+      border-radius:25px;
+      overflow:hidden;
+      cursor:pointer;
+      transition:0.5s ease;
+    }
+
+    .image-container::before{
+      content:'';
+      position:absolute;
+      inset:-4px;
+      border-radius:25px;
+      background:linear-gradient(45deg,#00f5ff,#7c3aed,#00f5ff);
+      z-index:-1;
+      animation:borderGlow 4s linear infinite;
+      background-size:400%;
+    }
+
+    @keyframes borderGlow{
+      0%{background-position:0 0;}
+      50%{background-position:300% 0;}
+      100%{background-position:0 0;}
+    }
+
+    .hero img{
+      width:100%;
+      display:block;
+      transition:transform 0.6s ease;
+      border-radius:25px;
+    }
+
+    .overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      opacity:0;
+      transition:0.5s ease;
+    }
+
+    .overlay h2{
+      font-size:2.5rem;
+      color:#00f5ff;
+      text-shadow:0 0 20px #00f5ff;
+    }
+
+    .image-container:hover img{
+      transform:scale(1.08);
+    }
+
+    .image-container:hover .overlay{
+      opacity:1;
+    }
+
+    /* RELOJ */
+    .clock{
+      margin-top:30px;
+      background:rgba(255,255,255,0.08);
+      padding:15px 30px;
+      border-radius:15px;
+      font-size:1.2rem;
+      border:1px solid rgba(255,255,255,0.2);
+      backdrop-filter:blur(8px);
+      box-shadow:0 0 20px rgba(0,255,255,0.15);
+    }
+
+    /* CARDS */
+    .team-section{
+      text-align:center;
+    }
+
+    .team-section h2{
+      font-size:2.5rem;
+      margin-bottom:50px;
+      color:#00d4ff;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:25px;
+    }
+
+    .card{
+      background:rgba(255,255,255,0.05);
+      border-radius:20px;
+      padding:30px;
+      transition:0.4s ease;
+      backdrop-filter:blur(10px);
+      border:2px solid;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card:hover{
+      transform:translateY(-10px) scale(1.03);
+      box-shadow:0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .card .icon{
+      width:70px;
+      height:70px;
+      margin:auto;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.8rem;
+      font-weight:bold;
+      margin-bottom:20px;
+      background:rgba(255,255,255,0.1);
+    }
+
+    .card h3{
+      margin-bottom:10px;
+      font-size:1.4rem;
+    }
+
+    .card p{
+      opacity:0.8;
+    }
+
+    .card1{border-color:#00f5ff;}
+    .card2{border-color:#ff00d4;}
+    .card3{border-color:#7c3aed;}
+    .card4{border-color:#00ff88;}
+
+    /* HTTP SECTION */
+    .http-section{
+      text-align:center;
+    }
+
+    .http-box{
+      background:rgba(255,255,255,0.05);
+      padding:40px;
+      border-radius:20px;
+      max-width:900px;
+      margin:auto;
+      border:1px solid rgba(255,255,255,0.1);
+      box-shadow:0 0 30px rgba(0,255,255,0.08);
+    }
+
+    .http-box h2{
+      margin-bottom:20px;
+      color:#00d4ff;
+    }
+
+    .http-box p{
+      line-height:1.8;
+      font-size:1.1rem;
+      opacity:0.9;
+    }
+
+    /* INTERACTIVO */
+    .interactive{
+      text-align:center;
+    }
+
+    .interactive button{
+      padding:18px 40px;
+      border:none;
+      border-radius:15px;
+      background:linear-gradient(90deg,#00d4ff,#7c3aed);
+      color:white;
+      font-size:1.1rem;
+      font-weight:600;
+      cursor:pointer;
+      transition:0.4s;
+      box-shadow:0 0 20px rgba(0,212,255,0.4);
+    }
+
+    .interactive button:hover{
+      transform:scale(1.08);
+      box-shadow:0 0 35px rgba(0,212,255,0.7);
+    }
+
+    #message{
+      margin-top:25px;
+      font-size:1.5rem;
+      color:#00ffae;
+      opacity:0;
+      transition:0.5s;
+    }
+
+    /* FOOTER */
+    footer{
+      background:#020617;
+      padding:30px;
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,0.08);
+      margin-top:50px;
+    }
+
+    footer p{
+      opacity:0.8;
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+
+      .hero h1{
+        font-size:2.3rem;
+      }
+
+      .overlay h2{
+        font-size:1.5rem;
+      }
+
+      .clock{
+        font-size:1rem;
+      }
+
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Proyecto - Servidor HTTP</h1>
+
+    <div class="image-container">
+      <img src="grupo.jpg" alt="Grupo">
+      <div class="overlay">
+        <h2>Equipo de Desarrollo</h2>
+      </div>
+    </div>
+
+    <div class="clock" id="clock">
+      Cargando fecha y hora...
+    </div>
+  </section>
+
+  <!-- INTEGRANTES -->
+  <section class="team-section">
+    <h2>Nuestro Equipo</h2>
+
+    <div class="cards">
+
+      <div class="card card1">
+        <div class="icon">1</div>
+        <h3>Integrante 1</h3>
+        <p>Líder del Proyecto</p>
+      </div>
+
+      <div class="card card2">
+        <div class="icon">2</div>
+        <h3>Integrante 2</h3>
+        <p>Desarrollador</p>
+      </div>
+
+      <div class="card card3">
+        <div class="icon">3</div>
+        <h3>Integrante 3</h3>
+        <p>Diseñador</p>
+      </div>
+
+      <div class="card card4">
+        <div class="icon">4</div>
+        <h3>Integrante 4</h3>
+        <p>QA / Tester</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HTTP -->
+  <section class="http-section">
+    <div class="http-box">
+      <h2>Nuestro Servidor HTTP</h2>
+      <p>
+        HTTP (HyperText Transfer Protocol) es el protocolo utilizado para la comunicación entre navegadores web y servidores. 
+        Permite transferir páginas, imágenes y recursos a través de Internet de manera eficiente.
+      </p>
+
+      <p style="margin-top:15px;">
+        Esta página está siendo servida mediante Apache2 sobre un sistema Linux, demostrando el funcionamiento correcto de un servidor HTTP moderno.
+      </p>
+    </div>
+  </section>
+
+  <!-- INTERACTIVO -->
+  <section class="interactive">
+    <button onclick="celebrar()">
+      Verificar Servidor HTTP
+    </button>
+
+    <div id="message">
+      ¡Servidor HTTP funcionando correctamente!
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      Universidad XYZ | Sistemas Operativos | 2026
+    </p>
+  </footer>
+
+  <script>
+
+    // RELOJ EN TIEMPO REAL
+    function actualizarReloj(){
+      const ahora = new Date();
+
+      const opciones = {
+        weekday:'long',
+        year:'numeric',
+        month:'long',
+        day:'numeric',
+        hour:'2-digit',
+        minute:'2-digit',
+        second:'2-digit'
+      };
+
+      document.getElementById('clock').innerHTML =
+        ahora.toLocaleDateString('es-ES', opciones);
+    }
+
+    setInterval(actualizarReloj,1000);
+    actualizarReloj();
+
+    // EFECTO CONFETTI
+    function celebrar(){
+
+      const mensaje = document.getElementById('message');
+
+      mensaje.style.opacity = "1";
+
+      // Explosión principal
+      confetti({
+        particleCount:180,
+        spread:120,
+        origin:{y:0.6}
+      });
+
+      // Lados
+      confetti({
+        particleCount:100,
+        angle:60,
+        spread:70,
+        origin:{x:0}
+      });
+
+      confetti({
+        particleCount:100,
+        angle:120,
+        spread:70,
+        origin:{x:1}
+      });
+
+      // Mensaje desaparece después
+      setTimeout(()=>{
+        mensaje.style.opacity = "0";
+      },5000);
+    }
+
+  </script>
+
+</body>
+</html>
